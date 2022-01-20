@@ -121,6 +121,12 @@ app.get("/species/:number", (req, res) => {
   }
 });
 
+app.get("/totalPokemon", (req, res) => {
+  fs.readdir(path.join(__dirname, "pokemon"), (err, fileNameArr) => {
+    res.json({ totalpokemon: fileNameArr.length });
+  });
+});
+
 app.get("*", (req, res) => res.sendStatus(404));
 
 app.listen(8080, () => console.log("Server up on 8080"));
