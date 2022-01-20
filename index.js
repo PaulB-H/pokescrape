@@ -64,4 +64,6 @@ app.get("/pokemon/:number", (req, res) => {
   }
 });
 
+app.get("*", (req, res) => res.sendStatus(404));
+
 app.listen(8080, () => console.log("Server up on 8080"));
