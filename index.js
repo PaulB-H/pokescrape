@@ -8,7 +8,7 @@ const compression = require("compression");
 app.use(compression());
 
 if (!fs.existsSync(path.join(__dirname, "pokemon"))) {
-  console.log("database directory missing, creating");
+  console.log("pokemon directory missing, creating");
 
   try {
     fs.mkdirSync(path.join(__dirname, "pokemon"));
@@ -43,10 +43,10 @@ const catchEmAll = async () => {
         })
         .catch((error) => {
           morePokemon = false;
-          console.log("Caught em all");
+          console.log("Saved all pokemon");
         });
     } else {
-      console.log("Pokemon exists moving to next...");
+      // console.log("Pokemon exists moving to next...");
       iter++;
     }
   } while (morePokemon === true);
@@ -54,11 +54,68 @@ const catchEmAll = async () => {
 
 catchEmAll();
 
+if (!fs.existsSync(path.join(__dirname, "species"))) {
+  console.log("species directory missing, creating");
+
+  try {
+    fs.mkdirSync(path.join(__dirname, "species"));
+  } catch (err) {
+    return console.log("Error creating dir:\n" + err);
+  }
+}
+
+const scrapeSpecies = async () => {
+  let iter = 1;
+  let morePokemon = true;
+  do {
+    if (!fs.existsSync(path.join(__dirname, "species", `${iter}.json`))) {
+      await axios
+        .get(`https://pokeapi.co/api/v2/pokemon-species/${iter}`, {
+          transformResponse: (res) => {
+            // NOT parsing response
+            // res = JSON.parse(res);
+            return res;
+          },
+          responseType: "json",
+        })
+        .then((response) => {
+          fs.writeFile(
+            path.join(__dirname, "species", `${iter}.json`),
+            response.data,
+            (err) => {
+              if (err) throw err;
+            }
+          );
+          iter++;
+        })
+        .catch((error) => {
+          morePokemon = false;
+          console.log("Saved all species");
+        });
+    } else {
+      // console.log("species exists moving to next...");
+      iter++;
+    }
+  } while (morePokemon === true);
+};
+
+scrapeSpecies();
+
 app.get("/pokemon/:number", (req, res) => {
   if (
     fs.existsSync(path.join(__dirname, "pokemon", `${req.params.number}.json`))
   ) {
     res.sendFile(path.join(__dirname, "pokemon", `${req.params.number}.json`));
+  } else {
+    res.sendStatus(404);
+  }
+});
+
+app.get("/species/:number", (req, res) => {
+  if (
+    fs.existsSync(path.join(__dirname, "species", `${req.params.number}.json`))
+  ) {
+    res.sendFile(path.join(__dirname, "species", `${req.params.number}.json`));
   } else {
     res.sendStatus(404);
   }
