@@ -43,7 +43,8 @@ const catchEmAll = async () => {
         })
         .catch((error) => {
           morePokemon = false;
-          console.log("Saved all pokemon");
+          pokemonLoaded = true;
+          console.log("Pokemon data ready!");
         });
     } else {
       // console.log("Pokemon exists moving to next...");
@@ -90,7 +91,8 @@ const scrapeSpecies = async () => {
         })
         .catch((error) => {
           morePokemon = false;
-          console.log("Saved all species");
+          speciesLoaded = true;
+          console.log("Species data ready!");
         });
     } else {
       // console.log("species exists moving to next...");
@@ -129,4 +131,15 @@ app.get("/totalPokemon", (req, res) => {
 
 app.get("*", (req, res) => res.sendStatus(404));
 
-app.listen(8080, () => console.log("Server up on 8080"));
+let pokemonLoaded = false;
+let speciesLoaded = false;
+const assetCheckInterval = setInterval(() => {
+  if (pokemonLoaded && speciesLoaded) {
+    startServer();
+    clearInterval(assetCheckInterval);
+  }
+}, 1000);
+
+const startServer = () => {
+  app.listen(8080, () => console.log("Server up on 8080"));
+};
